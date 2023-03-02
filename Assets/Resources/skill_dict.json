@@ -1,0 +1,46 @@
+{
+    "skills": [
+        {
+            "name": "_Test",
+            "effect": "None",
+            "effect_specifics": "None",
+            "targets": "None",
+            "cost": 0,
+            "scale": "None",
+            "power": 0,
+            "cooldown": 0,
+            "cooldown_counter": 0,
+            "chance": 100,
+            "condition": "Always",
+            "condition_specifics": "Always"
+        },
+        {
+            "name": "Heal Ally",
+            "effect": "Change_Stats",
+            "effect_specifics": "Health",
+            "targets": "Ally",
+            "cost": 1,
+            "scale": "Level",
+            "power": 1,
+            "cooldown": 0,
+            "cooldown_counter": 0,
+            "chance": 100,
+            "condition": "Always",
+            "condition_specifics": "Always"
+        },
+        {
+            "name": "Shield Ally",
+            "effect": "Change_Stats",
+            "effect_specifics": "Temp_Health",
+            "targets": "Ally",
+            "cost": 1,
+            "scale": "Level",
+            "power": 2,
+            "cooldown": 0,
+            "cooldown_counter": 0,
+            "chance": 100,
+            "condition": "Always",
+            "condition_specifics": "Always"
+        }
+    ]
+}

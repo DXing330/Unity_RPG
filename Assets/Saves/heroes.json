@@ -1,0 +1,46 @@
+{
+    "characters": [
+        {
+            "name": "Summoner",
+            "level": 1,
+            "max_level": 10,
+            "experience": 0,
+            "base_health": 20,
+            "health": 20,
+            "base_attack": 11,
+            "attack": 11,
+            "base_defense": 7,
+            "defense": 7,
+            "base_energy": 11,
+            "energy": 11,
+            "temp_health": 0,
+            "accuracy": 100,
+            "evasion": 0,
+            "damage_dealt": 100,
+            "damage_taken": 100,
+            "skill_list": [],
+            "passive_list": []
+        },
+        {
+            "name": "Warrior",
+            "level": 1,
+            "max_level": 10,
+            "experience": 0,
+            "base_health": 20,
+            "health": 20,
+            "base_attack": 17,
+            "attack": 17,
+            "base_defense": 9,
+            "defense": 9,
+            "base_energy": 7,
+            "energy": 7,
+            "temp_health": 0,
+            "accuracy": 100,
+            "evasion": 0,
+            "damage_dealt": 100,
+            "damage_taken": 100,
+            "skill_list": [],
+            "passive_list": []
+        }
+    ]
+}
