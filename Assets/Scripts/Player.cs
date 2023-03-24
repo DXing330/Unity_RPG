@@ -10,7 +10,6 @@ public class Player : Mover
     private float last_dash;
     public int bonus_health;
     public int damage_multiplier;
-    public int mana;
     // Affects drops.
     public int luck;
 
@@ -41,6 +40,7 @@ public class Player : Mover
             float y = Input.GetAxisRaw("Vertical");
             Dash(new Vector3(x,y,0));
             last_dash = Time.time;
+            PayHealth(1);
         }
     }
     private void FixedUpdate()
@@ -61,10 +61,8 @@ public class Player : Mover
 
     public void SetLevel(int level)
     {
-        for (int i = 1; i < level; i++)
-        {
-            LevelUp();
-        }
+        playerLevel = level;
+        SetMaxHealth();
     }
 
     public void SetStats(PlayerStatsWrapper loaded_stats)
@@ -72,8 +70,30 @@ public class Player : Mover
         bonus_health = loaded_stats.bonus_health;
         damage_multiplier = loaded_stats.damage_multiplier;
         damage_reduction = loaded_stats.damage_reduction;
-        mana = loaded_stats.mana;
         luck = loaded_stats.luck;
+    }
+
+    public void SetMaxHealth()
+    {
+        max_health = playerLevel * 10;
+        max_health += bonus_health;
+    }
+
+    public void SetHealth(int new_health)
+    {
+        health = new_health;
+        GameManager.instance.OnHealthChange();
+    }
+
+    protected void PayHealth(int cost)
+    {
+        health -= cost;
+        GameManager.instance.OnHealthChange();
+        if (health <= 0)
+        {
+            health = 0;
+            Death();
+        }
     }
 
     protected override void Death()

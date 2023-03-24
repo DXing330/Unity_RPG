@@ -28,7 +28,7 @@ public class Projectile : EnemyHitbox
     }
     protected override void OnCollide(Collider2D coll)
     {
-        if (coll.tag == "Fighter" && coll.name == "Player")
+        if (coll.tag == "Fighter")
         {
             Damage damage = new Damage
             {
@@ -37,6 +37,10 @@ public class Projectile : EnemyHitbox
                 push_force = push_force
             };
             coll.SendMessage("ReceiveDamage", damage);
+            Destroy(gameObject);
+        }
+        if (coll.tag == "Block")
+        {
             Destroy(gameObject);
         }
     }
@@ -54,5 +58,9 @@ public class Projectile : EnemyHitbox
     public virtual void FireProjectile(Vector3 force)
     {
         rigidBody2D.velocity = new Vector3(force.x * speed, force.y * speed, 0);
+        if (force.x < 0)
+        {
+            transform.localScale = new Vector3(transform.localScale.x*-1, transform.localScale.y, 0);
+        }
     }
 }

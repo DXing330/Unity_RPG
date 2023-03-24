@@ -41,7 +41,6 @@ public class GameManager : MonoBehaviour
     public int mana_crystals;
     public int experience;
     public int stat_points;
-    public int familiar_stat_points;
 
     // Floating text.
     public void ShowText(string msg, int fontSize, Color color, Vector3 position, Vector3 motion, float duration)
@@ -59,11 +58,6 @@ public class GameManager : MonoBehaviour
         {
             level = weapon.weaponLevel + 1;
             price = weaponPrice;
-        }
-        else if (thing == "familiar")
-        {
-            level = familiar.familiar_level + 1;
-            price = familiarPrice;
         }
         else
         {
@@ -93,23 +87,12 @@ public class GameManager : MonoBehaviour
     // Upgrade Familiar.
     public bool TryUpgradeFamiliar()
     {
-        int cost = DeterminePrice("familiar");
-        if (mana_crystals >= cost)
-        {
-            mana_crystals -= cost;
-            familiar.SetLevel(familiar.familiar_level+1);
-            familiar_stat_points += familiar.familiar_level;
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 
     public bool UpgradePlayerStats(string upgraded_stat)
     {
-        if (stat_points < 0)
+        if (stat_points > 0)
         {
             if (upgraded_stat == "bonus_health")
             {
@@ -122,10 +105,6 @@ public class GameManager : MonoBehaviour
             else if (upgraded_stat == "damage_reduction")
             {
                 player.damage_reduction++;
-            }
-            else if (upgraded_stat == "mana")
-            {
-                player.mana++;
             }
             else if (upgraded_stat == "luck")
             {
@@ -143,24 +122,40 @@ public class GameManager : MonoBehaviour
 
     public bool UpgradeFamiliarStats(string upgraded_stat)
     {
-        if (familiar_stat_points < 0)
+        if (upgraded_stat == "bonus_rotate_speed" && mana_crystals > familiar.bonus_rotate_speed)
         {
-            if (upgraded_stat == "rotate_speed_increase")
-            {
-                familiar.rotate_speed_increase++;
-            }
-            else if (upgraded_stat == "heal_threshold_increase")
-            {
-                familiar.heal_threshold_increase++;
-            }
-            else
-            {
-                familiar_stat_points++;
-            }
-            familiar_stat_points--;
+            familiar.bonus_rotate_speed++;
+            mana_crystals -= familiar.bonus_rotate_speed;
             return true;
         }
-        return false;
+        else if (upgraded_stat == "heal_threshold_increase" && mana_crystals > familiar.heal_threshold_increase)
+        {
+            familiar.heal_threshold_increase++;
+            mana_crystals -= familiar.heal_threshold_increase;
+            return true;
+        }
+        else if (upgraded_stat == "bonus_damage" && mana_crystals > familiar.bonus_damage)
+        {
+            familiar.bonus_damage++;
+            mana_crystals -= familiar.bonus_damage;
+            return true;
+        }
+        else if (upgraded_stat == "bonus_push_force" && mana_crystals > familiar.bonus_push_force)
+        {
+            familiar.bonus_push_force++;
+            mana_crystals -= familiar.bonus_push_force;
+            return true;
+        }
+        else if (upgraded_stat == "bonus_heal" && mana_crystals > familiar.bonus_heal)
+        {
+            familiar.bonus_heal++;
+            mana_crystals -= familiar.bonus_heal;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public int GetExptoLevel()
@@ -170,14 +165,51 @@ public class GameManager : MonoBehaviour
 
         return exp;
     }
+
+    public float GetLuckBonus()
+    {
+        float luck_bonus = 1.0f;
+        if (player.luck <= 100)
+        {
+            float random_luck = Random.Range(0, player.luck);
+            float random_luck_percentage = random_luck/100;
+            luck_bonus += random_luck_percentage;
+        }
+        else
+        {
+            float luck_percentage = player.luck/(100 + player.luck);
+            luck_bonus += luck_percentage;
+        }
+        return luck_bonus;
+    }
+
     public void GrantExp(int exp)
     {
-        experience += exp;
+        float luck_bonus = GetLuckBonus();
+        int added_exp = Mathf.RoundToInt(exp * (luck_bonus));
+        experience +=added_exp;
+        ShowText("+" + added_exp + "exp", 20, Color.cyan, player.transform.position, Vector3.up*40, 1.0f);
         if(experience >= GetExptoLevel())
         {
             experience -= GetExptoLevel();
             PlayerLevelUp();
+            ShowText("Leveled Up!", 30, Color.green, player.transform.position, Vector3.up*33, 2.0f);
         }
+    }
+
+    public void GrantCoins(int money)
+    {
+        float luck_bonus = GetLuckBonus();
+        int added_coins = Mathf.RoundToInt(money * luck_bonus);
+        coins += added_coins;
+        ShowText("+ "+added_coins+" coins", 20, Color.yellow, player.transform.position, Vector3.up*25, 1.0f);
+    }
+
+    public void GrantMana(int crystals)
+    {
+        float luck_bonus = GetLuckBonus();
+        int added_mana = Mathf.RoundToInt(crystals * luck_bonus);
+        mana_crystals += added_mana;
     }
     public void PlayerLevelUp()
     {
@@ -238,17 +270,18 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded -= LoadState;
         if (File.Exists("Assets/Saves/save_data.json"))
         {
+            string player_stats = File.ReadAllText("Assets/Saves/player_stats.json");
+            PlayerStatsWrapper loaded_player_stats = JsonUtility.FromJson<PlayerStatsWrapper>(player_stats);
+            player.SetStats(loaded_player_stats);
             string save_data = File.ReadAllText("Assets/Saves/save_data.json");
             SaveDataWrapper loaded_data = JsonUtility.FromJson<SaveDataWrapper>(save_data);
             player.SetLevel(loaded_data.player_level);
-            familiar.SetLevel(loaded_data.familiar_level);
+            player.SetHealth(loaded_data.player_health);
             weapon.SetLevel(loaded_data.weapon_level);
             coins = loaded_data.coins;
             mana_crystals = loaded_data.mana_crystals;
             experience = loaded_data.experience;
-            string player_stats = File.ReadAllText("Assets/Saves/player_stats.json");
-            PlayerStatsWrapper loaded_player_stats = JsonUtility.FromJson<PlayerStatsWrapper>(player_stats);
-            player.SetStats(loaded_player_stats);
+            stat_points = loaded_data.stat_points;
             string familiar_stats = File.ReadAllText("Assets/Saves/familiar_stats.json");
             FamiliarStatsWrapper loaded_familiar_stats = JsonUtility.FromJson<FamiliarStatsWrapper>(familiar_stats);
             familiar.SetStats(loaded_familiar_stats);

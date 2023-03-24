@@ -65,7 +65,8 @@ public class Weapon : Collideable
                 origin = transform.position,
                 push_force = push_force + (push_gain * weaponLevel)
             };
-            damage.damage_amount = Mathf.RoundToInt(damage.damage_amount * (1 + (damage_multiplier/100)));
+            float increase_percentage = damage_multiplier/(50 + damage_multiplier);
+            damage.damage_amount = Mathf.RoundToInt(damage.damage_amount * (1.0f + increase_percentage));
             coll.SendMessage("ReceiveDamage", damage);
         }
     }
@@ -85,11 +86,11 @@ public class Weapon : Collideable
         weaponLevel++;
         if (weaponLevel >= GameManager.instance.weaponSprites.Count)
         {
-            spriteRenderer.sprite = GameManager.instance.weaponSprites[GameManager.instance.weaponSprites.Count];
+            spriteRenderer.sprite = GameManager.instance.weaponSprites[GameManager.instance.weaponSprites.Count-1];
         }
         else
         {
-            spriteRenderer.sprite = GameManager.instance.weaponSprites[GameManager.instance.weapon.weaponLevel];
+            spriteRenderer.sprite = GameManager.instance.weaponSprites[weaponLevel];
         }
     }
 
@@ -98,7 +99,7 @@ public class Weapon : Collideable
         weaponLevel = level;
         if (weaponLevel >= GameManager.instance.weaponSprites.Count)
         {
-            spriteRenderer.sprite = GameManager.instance.weaponSprites[GameManager.instance.weaponSprites.Count];
+            spriteRenderer.sprite = GameManager.instance.weaponSprites[GameManager.instance.weaponSprites.Count-1];
         }
         else
         {

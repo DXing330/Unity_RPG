@@ -25,7 +25,12 @@ public class Fighter : MonoBehaviour
         {
             last_i_frame = Time.time;
             damage.damage_amount -= defense;
-            damage.damage_amount = Mathf.RoundToInt(damage.damage_amount * (1 - (damage_reduction/(100 + damage_reduction))));
+            float reduction_float = damage_reduction;
+            float reduction_percentage = reduction_float/(100 + reduction_float);
+            Debug.Log(damage.damage_amount);
+            Debug.Log(reduction_percentage);
+            damage.damage_amount = Mathf.RoundToInt(damage.damage_amount * (1.0f - reduction_percentage));
+            Debug.Log(damage.damage_amount);
             if (damage.damage_amount < 1)
             {
                 damage.damage_amount = 1;

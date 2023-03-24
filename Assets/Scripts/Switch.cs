@@ -37,7 +37,7 @@ public class Switch : Activatable
 
     protected void OnCollide(Collider2D coll)
     {
-        if (coll.name == "Player" || coll.name == "Weapon")
+        if (coll.name == "Weapon")
         {
             if (Time.time - last_flip > flip_cooldown)
             {

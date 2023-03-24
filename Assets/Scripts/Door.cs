@@ -23,15 +23,25 @@ public class Door : Activatable
         base.Activate();
         if (active)
         {
-            GetComponent<SpriteRenderer>().sprite = open_door;
-            box_collider.enabled = false;
-            obstacle.enabled = false;
+            OpenDoor();
         }
         else
         {
-            GetComponent<SpriteRenderer>().sprite = closed_door;
-            box_collider.enabled = true;
-            obstacle.enabled = true;
+            CloseDoor();
         }
+    }
+
+    public void OpenDoor()
+    {
+        GetComponent<SpriteRenderer>().sprite = open_door;
+        box_collider.enabled = false;
+        obstacle.enabled = false;
+    }
+
+    public void CloseDoor()
+    {
+        GetComponent<SpriteRenderer>().sprite = closed_door;
+        box_collider.enabled = true;
+        obstacle.enabled = true;
     }
 }

@@ -54,7 +54,6 @@ public class SaveDataManager
             string save_data = File.ReadAllText("Assets/Saves/save_data.json");
             SaveDataWrapper loaded_data = JsonUtility.FromJson<SaveDataWrapper>(save_data);
             GameManager.instance.player.SetLevel(loaded_data.player_level);
-            GameManager.instance.familiar.SetLevel(loaded_data.familiar_level);
             GameManager.instance.weapon.SetLevel(loaded_data.weapon_level);
             GameManager.instance.coins = loaded_data.coins;
             GameManager.instance.mana_crystals = loaded_data.mana_crystals;
@@ -70,25 +69,23 @@ public class SaveDataManager
 public class SaveDataWrapper
 {
     public int player_level;
-    public int familiar_level;
+    public int player_health;
     public int weapon_level;
     public int coins;
     public int mana_crystals;
     public int experience;
     public int stat_points;
-    public int familiar_stat_points;
     public string random_stuff;
 
     public void UpdateData()
     {
         player_level = GameManager.instance.player.playerLevel;
-        familiar_level = GameManager.instance.familiar.familiar_level;
+        player_health = GameManager.instance.player.health;
         weapon_level = GameManager.instance.weapon.weaponLevel;
         coins = GameManager.instance.coins;
         mana_crystals = GameManager.instance.mana_crystals;
         experience = GameManager.instance.experience;
         stat_points = GameManager.instance.stat_points;
-        familiar_stat_points = GameManager.instance.familiar_stat_points;
     }
 }
 
@@ -97,7 +94,6 @@ public class PlayerStatsWrapper
     public int bonus_health;
     public int damage_multiplier;
     public int damage_reduction;
-    public int mana;
     public int luck;
 
     public void UpdateData()
@@ -105,19 +101,24 @@ public class PlayerStatsWrapper
         bonus_health = GameManager.instance.player.bonus_health;
         damage_multiplier = GameManager.instance.player.damage_multiplier;
         damage_reduction = GameManager.instance.player.damage_reduction;
-        mana = GameManager.instance.player.mana;
         luck = GameManager.instance.player.luck;
     }
 }
 
 public class FamiliarStatsWrapper
 {
-    public int rotate_speed_increase;
+    public int bonus_rotate_speed;
     public int heal_threshold_increase;
+    public int bonus_damage;
+    public int bonus_push_force;
+    public int bonus_heal;
 
     public void UpdateData()
     {
-        rotate_speed_increase = GameManager.instance.familiar.rotate_speed_increase;
+        bonus_rotate_speed = GameManager.instance.familiar.bonus_rotate_speed;
         heal_threshold_increase = GameManager.instance.familiar.heal_threshold_increase;
+        bonus_damage = GameManager.instance.familiar.bonus_damage;
+        bonus_push_force = GameManager.instance.familiar.bonus_push_force;
+        bonus_heal = GameManager.instance.familiar.bonus_heal;
     }
 }

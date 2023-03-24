@@ -14,8 +14,7 @@ public class Chest : Collectable
             collected = true;
             coinsAmount = Random.Range(coinsAmount, coinsAmount*2);
             GetComponent<SpriteRenderer>().sprite = emptyChest;
-            GameManager.instance.ShowText("+ "+coinsAmount+" coins", 20, Color.yellow, transform.position,Vector3.up*25,1.0f);
-            GameManager.instance.coins += coinsAmount;
+            GameManager.instance.GrantCoins(coinsAmount);
         }
     }
 }

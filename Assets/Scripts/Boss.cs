@@ -20,6 +20,6 @@ public class Boss : Enemy
     protected override void Death()
     {
         base.Death();
-        GameManager.instance.mana_crystals += mana_crystals;
+        GameManager.instance.GrantMana(mana_crystals);
     }
 }

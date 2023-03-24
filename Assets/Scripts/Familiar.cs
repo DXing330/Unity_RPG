@@ -6,45 +6,72 @@ using UnityEngine;
 // Passive ally that assists the hero.
 public class Familiar : MonoBehaviour
 {
-    public int familiar_level;
     // Will need to stick around the player.
     private Transform player_transform;
-    public float max_distance_from_player = 0.6f;
-    // If chasing then they'll try to catch up to the player.
-    private bool chasing;
-    // Otherwise they'll fly around the player.
+    // Familiar will fly around the player.
     private float rotate_speed = 1.0f;
-    private float rotate_gain_per_level = 0.2f;
     private float radius = 0.3f;
     private Vector3 center;
     private float angle;
     // Has a chance of healing the hero, with their blood magic.
-    private int heal_counter = 0;
+    private float heal_cooldown = 6.6f;
+    private float last_heal;
+    // Keep track of collisions.
     public ContactFilter2D filter;
+    private BoxCollider2D boxCollider;
+    private Collider2D[] hits = new Collider2D[10];
+    // Base stats that will automatically adjust on level.
+    private float push_force = 1.0f;
+    private float hit_cooldown = 0.25f;
+    private float last_hit;
     // Customizable stats that the player can put stat points into whenever the familiar levels up.
-    public int rotate_speed_increase = 0;
+    public int upgrade_cost = 1;
+    public int bonus_rotate_speed = 0;
     public int heal_threshold_increase = 0;
+    public int bonus_damage = 0;
+    public int bonus_push_force = 0;
+    public int bonus_heal = 0;
 
     protected void Start()
     {
+        boxCollider = GetComponent<BoxCollider2D>();
         player_transform = GameManager.instance.player.transform;
         center = player_transform.position;
     }
 
     private void FixedUpdate()
     {
-        angle += (rotate_speed + (rotate_gain_per_level * familiar_level) + (rotate_speed_increase/10)) * Time.deltaTime;
+        center = player_transform.position;
+        angle += (rotate_speed + (bonus_rotate_speed/10)) * Time.deltaTime;
         var offset = new Vector3(Mathf.Sin(angle), Mathf.Cos(angle), 0) * radius;
         transform.position = center + offset;
-        heal_counter += 1;
-        if (heal_counter >= 1000 && (GameManager.instance.player.health - heal_threshold_increase) * 3 < GameManager.instance.player.max_health)
+        boxCollider.OverlapCollider(filter,hits);
+        for (int i = 0; i < hits.Length; i++)
         {
-            HealMaster();
+            if (hits[i] == null)
+                continue;
+            
+            OnCollide(hits[i]);
+
+            // Clear the array after you're done.
+            hits[i] = null;
         }
-        else if (heal_counter >= 1000 && GameManager.instance.player.health >= GameManager.instance.player.max_health)
+        if (Time.time - last_heal > heal_cooldown)
+        {
+            last_heal = Time.time;
+            CheckOnMaster();
+        }
+    }
+
+    protected void CheckOnMaster()
+    {
+        if ((GameManager.instance.player.health - heal_threshold_increase) * 3 < GameManager.instance.player.max_health)
+            {
+                HealMaster();
+            }
+        else if (GameManager.instance.player.health >= GameManager.instance.player.max_health)
         {
             int talk = Random.Range(0, 10);
-            heal_counter = 0;
             if (talk == 0)
             {
                 GameManager.instance.ShowText("Find Enemies! Make Blood!", 15, Color.red, transform.position, Vector3.up*25, 1.0f);
@@ -53,7 +80,7 @@ public class Familiar : MonoBehaviour
             {
                 Damage damage = new Damage
                 {
-                    damage_amount = familiar_level * familiar_level,
+                    damage_amount = GameManager.instance.player.playerLevel,
                     origin = transform.position,
                     push_force = 0
                 };
@@ -62,30 +89,35 @@ public class Familiar : MonoBehaviour
             }
         }
     }
-
     protected void HealMaster()
     {
-        heal_counter = 0;
-        GameManager.instance.player.SendMessage("ReceiveHealing", familiar_level);
+        GameManager.instance.player.SendMessage("ReceiveHealing", bonus_heal+1);
         GameManager.instance.ShowText("Blood for Master.", 15, Color.white, transform.position, Vector3.up*25, 0.7f);
     }
 
-    protected void UpdateMotor(Vector3 input)
+    protected virtual void OnCollide(Collider2D coll)
     {
-        transform.Translate(0, input.y * Time.deltaTime, 0);
-        transform.Translate(input.x * Time.deltaTime, 0, 0);
-    }
-
-    public void SetLevel(int level)
-    {
-        familiar_level = level;
-        FamiliarHitbox hitbox = GetComponentInChildren<FamiliarHitbox>();
-        hitbox.Update_Level();
+        if (coll.tag == "Enemy" && Time.time - last_hit > hit_cooldown)
+        {
+            last_hit = Time.time;
+            // Make a damage object and send it to the player.
+            Damage damage = new Damage
+            {
+                damage_amount = 1 + bonus_damage,
+                origin = transform.position,
+                push_force = push_force + (bonus_push_force/10)
+            };
+            coll.SendMessage("ReceiveDamage", damage);
+            GameManager.instance.ShowText("Hehe Fresh Blood.", 15, Color.red, transform.position, Vector3.up*25, 1.0f);
+        }
     }
 
     public void SetStats(FamiliarStatsWrapper loaded_stats)
     {
-        rotate_speed_increase = loaded_stats.rotate_speed_increase;
+        bonus_rotate_speed = loaded_stats.bonus_rotate_speed;
         heal_threshold_increase = loaded_stats.heal_threshold_increase;
+        bonus_damage = loaded_stats.bonus_damage;
+        bonus_push_force = loaded_stats.bonus_push_force;
+        bonus_heal = loaded_stats.bonus_heal;
     }
 }
