@@ -8,8 +8,8 @@ public abstract class Mover : Fighter
     protected BoxCollider2D boxCollider;
     protected Vector3 moveDelta;
     protected RaycastHit2D hit;
-    public float y_speed = 1.0f;
-    public float x_speed = 1.0f;
+    protected float y_speed = 1.0f;
+    protected float x_speed = 1.0f;
 
     protected virtual void Start()
     {

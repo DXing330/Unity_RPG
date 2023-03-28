@@ -65,7 +65,8 @@ public class Weapon : Collideable
                 origin = transform.position,
                 push_force = push_force + (push_gain * weaponLevel)
             };
-            float increase_percentage = damage_multiplier/(50 + damage_multiplier);
+            float multiplier_float = damage_multiplier;
+            float increase_percentage = multiplier_float/(50 + multiplier_float);
             damage.damage_amount = Mathf.RoundToInt(damage.damage_amount * (1.0f + increase_percentage));
             coll.SendMessage("ReceiveDamage", damage);
         }

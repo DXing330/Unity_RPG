@@ -7,75 +7,96 @@ public class Enemy : Mover
 {
     public int exp_value = 1;
     // Logic.
-    // How close until the enemy chases.
-    public float trigger_length = 0.5f;
     // How far the enemy chases before returning.
     public float chase_length = 2;
-    private bool chasing;
-    private bool colliding_with_player;
-    private Transform player_transform;
-    private Vector3 starting_position;
-    private NavMeshAgent agent;
+    protected bool chasing;
+    protected bool horizontal_flip = false;
+    protected bool colliding = false;
+    protected Vector3 starting_position;
+    protected NavMeshAgent agent;
 
     // Hitbox.
     public ContactFilter2D filter;
-    private BoxCollider2D hitbox;
-    private Collider2D[] hits = new Collider2D[10];
+    protected Collider2D[] hits = new Collider2D[10];
+    public BoxCollider2D hitbox;
+    public CircleCollider2D detection_range;
+    protected Transform target_transform = null;
 
     protected override void Start()
     {
         base.Start();
-        player_transform = GameManager.instance.player.transform;
         starting_position = transform.position;
-        hitbox = transform.GetChild(0).GetComponent<BoxCollider2D>();
         agent = GetComponent<NavMeshAgent>();
 		agent.updateRotation = false;
 		agent.updateUpAxis = false;
     }
 
-    private void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
         // Push the enemy around if they have been pushed.
         if (push_direction.magnitude > 0)
         {
             UpdateMotor(Vector3.zero);
         }
-        // Check if the player is in range.
-        if (Vector3.Distance(player_transform.position, transform.position) < chase_length)
+        if (target_transform == null)
         {
-            if (Vector3.Distance(player_transform.position, transform.position) < trigger_length)
+            if (chasing)
+            {
+                chasing = false;
+            }
+            detection_range.OverlapCollider(filter, hits);
+            for (int j = 0; j < hits.Length; j++)
+            {
+                if (hits[j] == null)
+                {
+                    continue;
+                }
+                if (hits[j].tag == "Fighter")
+                {
+                    target_transform = hits[j].transform;
+                    return;
+                }
+                hits[j] = null;
+            }
+            agent.SetDestination(starting_position);
+        }
+        // Check if the player is in range.
+        else if (target_transform != null)
+        {
+            if (!chasing)
             {
                 chasing = true;
             }
 
             if (chasing)
             {
-                if (!colliding_with_player)
+                if (!colliding)
                 {
-                    agent.SetDestination(player_transform.position);
+                    agent.SetDestination(target_transform.position);
+                    if (target_transform.position.x - transform.position.x < 0 && !horizontal_flip)
+                    {
+                        horizontal_flip = true;
+                        transform.localScale = new Vector3(transform.localScale.x*-1, transform.localScale.y, 0);
+                    }
+                    else if (target_transform.position.x - transform.position.x > 0 && horizontal_flip)
+                    {
+                        horizontal_flip = false;
+                        transform.localScale = new Vector3(transform.localScale.x*-1, transform.localScale.y, 0);
+                    }
                 }
             }
-            else
-            {
-                agent.SetDestination(starting_position);
-            }
-        }
-        else
-        {
-            agent.SetDestination(starting_position);
-            chasing = false;
         }
 
-        colliding_with_player = false;
-        boxCollider.OverlapCollider(filter,hits);
+        colliding = false;
+        hitbox.OverlapCollider(filter, hits);
         for (int i = 0; i < hits.Length; i++)
         {
             if (hits[i] == null)
                 continue;
             
-            if (hits[i].tag == "Fighter" && hits[i].name == "Player")
+            if (hits[i].tag == "Fighter")
             {
-                colliding_with_player = true;
+                colliding = true;
             }
 
             // Clear the array after you're done.

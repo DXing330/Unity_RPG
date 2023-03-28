@@ -22,11 +22,12 @@ public class Familiar : MonoBehaviour
     private Collider2D[] hits = new Collider2D[10];
     // Base stats that will automatically adjust on level.
     private float push_force = 1.0f;
-    private float hit_cooldown = 0.25f;
+    private float hit_cooldown = 0.5f;
     private float last_hit;
     // Customizable stats that the player can put stat points into whenever the familiar levels up.
     public int upgrade_cost = 1;
     public int bonus_rotate_speed = 0;
+    public float bonus_rotate_speed_float = 0;
     public int heal_threshold_increase = 0;
     public int bonus_damage = 0;
     public int bonus_push_force = 0;
@@ -42,7 +43,7 @@ public class Familiar : MonoBehaviour
     private void FixedUpdate()
     {
         center = player_transform.position;
-        angle += (rotate_speed + (bonus_rotate_speed/10)) * Time.deltaTime;
+        angle += (rotate_speed + (bonus_rotate_speed_float/10)) * Time.deltaTime;
         var offset = new Vector3(Mathf.Sin(angle), Mathf.Cos(angle), 0) * radius;
         transform.position = center + offset;
         boxCollider.OverlapCollider(filter,hits);
@@ -115,6 +116,7 @@ public class Familiar : MonoBehaviour
     public void SetStats(FamiliarStatsWrapper loaded_stats)
     {
         bonus_rotate_speed = loaded_stats.bonus_rotate_speed;
+        bonus_rotate_speed_float = bonus_rotate_speed * 1.0f;
         heal_threshold_increase = loaded_stats.heal_threshold_increase;
         bonus_damage = loaded_stats.bonus_damage;
         bonus_push_force = loaded_stats.bonus_push_force;

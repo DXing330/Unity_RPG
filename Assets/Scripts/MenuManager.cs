@@ -73,8 +73,6 @@ public class MenuManager : MonoBehaviour
             UpdateMenu();
             animator.SetTrigger("Show");
         }
-        Debug.Log(showing_inner_screen);
-        Debug.Log(showing);
     }
 
     public void ShowPlayerStatUpgrades()
@@ -90,15 +88,11 @@ public class MenuManager : MonoBehaviour
     public void ShowInnerScreen()
     {
         showing_inner_screen = true;
-        Debug.Log(showing_inner_screen);
-        Debug.Log(showing);
     }
 
     public void HideInnerScreen()
     {
         showing_inner_screen = false;
-        Debug.Log(showing_inner_screen);
-        Debug.Log(showing);
     }
 
     public void Update()
